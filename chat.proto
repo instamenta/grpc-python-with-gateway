@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package chat;
+
+option go_package = "chat/";
+
+import "proto/google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
+
+service Bookstore {
+  rpc PingPong(Ping) returns (Pong) {
+    option (google.api.http) = { get: "/api/v1/ping" };
+  }
+}
+
+message Ping {
+  google.protobuf.StringValue ping = 1;
+}
+message Pong {
+  google.protobuf.StringValue pong = 1;
+}
