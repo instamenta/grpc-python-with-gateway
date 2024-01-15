@@ -4,19 +4,82 @@ package chat;
 
 option go_package = "chat/";
 
-import "proto/google/api/annotations.proto";
-import "google/protobuf/empty.proto";
 import "google/protobuf/wrappers.proto";
+import "google/api/annotations.proto";
 
-service Bookstore {
-  rpc PingPong(Ping) returns (Pong) {
-    option (google.api.http) = { get: "/api/v1/ping" };
+service ChatService {
+  rpc CreateUser(CreateUserRequest) returns (Empty) {
+    option (google.api.http) = {
+      post: "/api/v1/user",
+      body: "name",
+    };
   }
+  rpc GetUser(GetById) returns (User) {
+    option (google.api.http) = {
+      get: "/api/v1/user/{id}",
+    };
+  };
+  rpc SendMessage(Message) returns (Empty) {
+    option (google.api.http) = {
+      post: "/api/v1/messages/{sender}/{recipient}",
+      body: "content"
+    };
+  };
+  rpc GetMultipleUsers(Pagination) returns (stream User) {
+    option (google.api.http) = {
+      get: "/api/v1/user",
+    };
+  };
+  rpc SendMultipleMessages(stream Message) returns (Empty) {
+    option (google.api.http) = {
+      post: "/api/deprecated",
+    };
+  };
+  rpc GetMessages(GetMessagesRequest) returns (stream Message) {
+    option (google.api.http) = {
+      get: "/api/v1/messages/{sender}/{recipient}",
+    };
+  };
 }
 
-message Ping {
-  google.protobuf.StringValue ping = 1;
+message CreateUserRequest {
+  google.protobuf.StringValue name = 1;
 }
-message Pong {
-  google.protobuf.StringValue pong = 1;
+
+message Pagination {
+  google.protobuf.Int32Value skip = 1;
+  google.protobuf.Int32Value limit = 2;
 }
+
+message GetById {
+  google.protobuf.StringValue id = 1;
+}
+
+message GetMessagesRequest {
+  google.protobuf.StringValue sender = 1;
+  google.protobuf.StringValue recipient = 2;
+  google.protobuf.Int32Value skip = 3;
+  google.protobuf.Int32Value limit = 4;
+}
+
+message User {
+  google.protobuf.StringValue id = 1;
+  google.protobuf.StringValue name = 2;
+}
+
+message Message {
+  google.protobuf.StringValue sender = 1;
+  google.protobuf.StringValue recipient = 2;
+  google.protobuf.StringValue content = 3;
+  google.protobuf.StringValue id = 4;
+
+  enum MessageStatus {
+    SEEN = 0;
+    SEND = 1;
+    PENDING = 2;
+  }
+  MessageStatus message_status = 12 [json_name = "message_status"];
+}
+
+message Empty{}
+
